@@ -9,7 +9,7 @@ load_dotenv()
 @dataclass
 class MiMoConfig:
     api_base: str = os.getenv("MIMO_API_BASE", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
-    model: str = os.getenv("MIMO_MODEL", "qwen3.7-max")
+    model: str = os.getenv("MIMO_MODEL", "qwen3.5-omni-plus")
     api_key: str = os.getenv("MIMO_API_KEY", "")
     max_tokens: int = 2000
     temperature: float = 0.1

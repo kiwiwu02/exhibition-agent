@@ -1,0 +1,56 @@
+/opt/anaconda3/lib/python3.13/site-packages/pytest_asyncio/plugin.py:247: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture caching scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to function scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session"
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts ==============================
+platform darwin -- Python 3.13.5, pytest-8.3.4, pluggy-1.5.0 -- /opt/anaconda3/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/kiwimacbook/Desktop/中联创新
+plugins: jaxtyping-0.3.3, Faker-40.15.0, typeguard-4.5.1, asyncio-1.3.0, langsmith-0.4.38, anyio-4.13.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 42 items
+
+tests/test_agent.py::test_agent_init PASSED                              [  2%]
+tests/test_agent.py::test_process_card PASSED                            [  4%]
+tests/test_agent.py::test_process_card_with_background_check PASSED      [  7%]
+tests/test_agent.py::test_process_card_duplicate_detected PASSED         [  9%]
+tests/test_agent.py::test_format_response_success PASSED                 [ 11%]
+tests/test_agent.py::test_format_response_failure PASSED                 [ 14%]
+tests/test_background_checker.py::TestSearchCompanyInfo::test_search_company_info_正常调用 PASSED [ 16%]
+tests/test_background_checker.py::TestSearchCompanyInfo::test_search_company_info_无搜索结果 PASSED [ 19%]
+tests/test_background_checker.py::TestTavilySearch::test_tavily_search_无API_key返回空dict PASSED [ 21%]
+tests/test_background_checker.py::TestTavilySearch::test_tavily_search_网络错误返回空dict PASSED [ 23%]
+tests/test_background_checker.py::TestTavilySearch::test_tavily_search_HTTP状态错误返回空dict PASSED [ 26%]
+tests/test_background_checker.py::TestTavilySearch::test_tavily_search_JSON解析错误返回空dict PASSED [ 28%]
+tests/test_background_checker.py::TestTavilySearch::test_tavily_search_成功返回结果 PASSED [ 30%]
+tests/test_bitable.py::TestBitableClient::test_init_client PASSED        [ 33%]
+tests/test_bitable.py::TestBitableClient::test_get_tenant_access_token_success PASSED [ 35%]
+tests/test_bitable.py::TestBitableClient::test_get_tenant_access_token_failure PASSED [ 38%]
+tests/test_bitable.py::TestBitableClient::test_query_records_success PASSED [ 40%]
+tests/test_bitable.py::TestBitableClient::test_query_records_empty PASSED [ 42%]
+tests/test_bitable.py::TestBitableClient::test_create_record_success PASSED [ 45%]
+tests/test_bitable.py::TestBitableClient::test_create_record_failure PASSED [ 47%]
+tests/test_bitable.py::TestBitableClient::test_update_record_success PASSED [ 50%]
+tests/test_bitable.py::TestBitableClient::test_update_record_failure PASSED [ 52%]
+tests/test_bitable.py::TestBitableClient::test_card_to_fields PASSED     [ 54%]
+tests/test_bitable.py::TestBitableClient::test_record_to_session PASSED  [ 57%]
+tests/test_bitable.py::TestBitableClient::test_query_records_no_token PASSED [ 59%]
+tests/test_bitable.py::TestBitableClient::test_create_record_no_token PASSED [ 61%]
+tests/test_card_recognizer.py::test_recognize_business_card_signature PASSED [ 64%]
+tests/test_card_recognizer.py::test_recognize_business_card_file_not_found PASSED [ 66%]
+tests/test_card_recognizer.py::test_parse_valid_json PASSED              [ 69%]
+tests/test_card_recognizer.py::test_parse_invalid_json PASSED            [ 71%]
+tests/test_card_recognizer.py::test_parse_empty_input PASSED             [ 73%]
+tests/test_duplicate_checker.py::test_check_duplicate_no_match PASSED    [ 76%]
+tests/test_duplicate_checker.py::test_check_duplicate_email_match PASSED [ 78%]
+tests/test_duplicate_checker.py::test_similar_ratio_identical PASSED     [ 80%]
+tests/test_duplicate_checker.py::test_similar_ratio_similar PASSED       [ 83%]
+tests/test_duplicate_checker.py::test_similar_ratio_different PASSED     [ 85%]
+tests/test_duplicate_checker.py::test_normalize_phone_with_symbols PASSED [ 88%]
+tests/test_duplicate_checker.py::test_normalize_phone_with_spaces PASSED [ 90%]
+tests/test_duplicate_checker.py::test_check_duplicate_company_contact_match PASSED [ 92%]
+tests/test_duplicate_checker.py::test_check_duplicate_company_phone_match PASSED [ 95%]
+tests/test_feishu_doc.py::test_feishu_doc_client_init PASSED             [ 97%]
+tests/test_feishu_doc.py::test_feishu_doc_client_create_document PASSED  [100%]
+
+============================= 42 passed in 20.52s ==============================
