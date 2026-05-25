@@ -152,7 +152,11 @@ class BitableClient:
         if card.address:
             fields["公司地址"] = card.address
         if card.website:
-            fields["官网"] = card.website
+            # 链接类型需要特殊格式
+            website = card.website
+            if not website.startswith(('http://', 'https://')):
+                website = 'https://' + website
+            fields["官网"] = {"link": website, "text": card.website}
         if card.country:
             fields["国家/地区"] = card.country
         if card.region:
