@@ -1,11 +1,15 @@
 # src/config.py
 import os
 from dataclasses import dataclass
+from dotenv import load_dotenv
+
+# 加载.env文件
+load_dotenv()
 
 @dataclass
 class MiMoConfig:
-    api_base: str = os.getenv("MIMO_API_BASE", "https://api.mimo.ai/v1")
-    model: str = os.getenv("MIMO_MODEL", "mimo-v2.5")
+    api_base: str = os.getenv("MIMO_API_BASE", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1")
+    model: str = os.getenv("MIMO_MODEL", "qwen3.7-max")
     api_key: str = os.getenv("MIMO_API_KEY", "")
     max_tokens: int = 2000
     temperature: float = 0.1
