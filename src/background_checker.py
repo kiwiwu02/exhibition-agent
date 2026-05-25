@@ -1,6 +1,9 @@
 # src/background_checker.py
+import logging
 import httpx
 from .config import config
+
+logger = logging.getLogger(__name__)
 
 def search_company_info(company_name: str, country: str = "") -> dict:
     """使用Tavily搜索公司信息"""
@@ -56,6 +59,12 @@ def tavily_search(query: str) -> dict:
         )
         response.raise_for_status()
         return response.json()
-    except Exception as e:
-        print(f"Tavily搜索失败: {e}")
+    except httpx.HTTPStatusError as e:
+        logger.warning(f"Tavily HTTP状态错误: {e}")
+        return {}
+    except httpx.RequestError as e:
+        logger.warning(f"Tavily请求错误: {e}")
+        return {}
+    except ValueError as e:
+        logger.warning(f"Tavily响应解析错误: {e}")
         return {}
