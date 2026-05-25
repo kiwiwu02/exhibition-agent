@@ -121,3 +121,23 @@ def test_format_response_failure():
 
     assert "处理失败" in response
     assert "识别失败" in response
+
+def test_agent_with_multi_agent():
+    """测试Multi-Agent系统集成"""
+    agent = ExhibitionAgent()
+    card = BusinessCard(company_name="Test Corp", country="USA")
+
+    with patch.object(agent.supervisor, 'research') as mock_research:
+        mock_report = MagicMock()
+        mock_report.company_name = "Test Corp"
+        mock_report.basic_info = "Basic info"
+        mock_report.sources = ["https://example.com"]
+        mock_research.return_value = mock_report
+
+        with patch.object(agent.doc_client, 'generate_research_report') as mock_doc:
+            mock_doc.return_value = "https://feishu.cn/docx/test"
+
+            result = agent._perform_background_check(card)
+
+            assert result["success"] == True
+            assert "report_url" in result

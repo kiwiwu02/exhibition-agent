@@ -8,6 +8,7 @@ from .bitable import get_bitable_client, save_card_to_bitable, query_all_records
 from .background_checker import search_company_info
 from .feishu_doc import FeishuDocClient
 from .models import BusinessCard, CRMSession
+from .agents.supervisor import SupervisorAgent
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,7 @@ class ExhibitionAgent:
     def __init__(self):
         self.bitable_client = get_bitable_client()
         self.doc_client = FeishuDocClient()
+        self.supervisor = SupervisorAgent()
 
     def process_card(self, image_path: str, text_info: str = "") -> Dict:
         """处理名片图片"""
@@ -53,26 +55,22 @@ class ExhibitionAgent:
             return {"success": False, "error": str(e)}
 
     def _perform_background_check(self, card: BusinessCard) -> Dict:
-        """执行背调"""
+        """执行背调（使用Multi-Agent系统）"""
         try:
-            # 搜索公司信息
-            search_result = search_company_info(
-                card.company_name,
-                card.country
-            )
+            # 使用主管Agent执行调研
+            report = self.supervisor.research(card)
 
-            # 生成报告
+            # 生成飞书文档
             report_data = {
-                "country": card.country,
-                "city": card.city,
-                "main_business": search_result.get("basic_info", {}).get("answer", "待补充"),
-                "company_size": "待补充",
-                "credit_rating": "待评估",
-                "recent_news": str(search_result.get("recent_news", [])),
-                "sources": str(search_result.get("sources", []))
+                "basic_info": report.basic_info,
+                "business_track": report.business_track,
+                "financial_health": report.financial_health,
+                "org_structure": report.org_structure,
+                "news_reputation": report.news_reputation,
+                "sources": report.sources
             }
 
-            report_url = self.doc_client.generate_report(
+            report_url = self.doc_client.generate_research_report(
                 card.company_name,
                 report_data
             )
@@ -80,7 +78,7 @@ class ExhibitionAgent:
             return {
                 "success": True,
                 "report_url": report_url,
-                "search_result": search_result
+                "report": report
             }
 
         except Exception as e:
