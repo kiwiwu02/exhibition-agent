@@ -105,3 +105,34 @@ class FeishuDocClient:
 """
 
         return self.create_document(title, content)
+
+    def generate_research_report(self, company_name: str, report_data: dict) -> Optional[str]:
+        """生成调研报告文档（改进版，支持5维度调研报告格式）"""
+        title = f"{company_name} 公司调研报告"
+
+        # 构建报告内容
+        content = f"""# {company_name} 公司调研报告
+
+## 一、公司基础信息
+{report_data.get('basic_info', '暂无信息')}
+
+## 二、业务范围与商业模式
+{report_data.get('business_track', '暂无信息')}
+
+## 三、规模与健康度
+{report_data.get('financial_health', '暂无信息')}
+
+## 四、组织架构与团队动态
+{report_data.get('org_structure', '暂无信息')}
+
+## 五、动态、新闻与口碑
+{report_data.get('news_reputation', '暂无信息')}
+
+## 信息来源
+{chr(10).join('- ' + s for s in report_data.get('sources', []))}
+
+---
+*本报告由AI自动生成，信息仅供参考，请以实际调查为准。*
+"""
+
+        return self.create_document(title, content)

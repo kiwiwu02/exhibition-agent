@@ -33,3 +33,19 @@ def test_feishu_doc_client_create_document(mock_post):
     client = FeishuDocClient()
     result = client.create_document("测试报告", "# 测试报告\n\n这是测试内容")
     assert result == "https://feishu.cn/docx/doc123"
+
+def test_generate_research_report():
+    client = FeishuDocClient()
+    report_data = {
+        "basic_info": "Basic company info",
+        "business_track": "Business track info",
+        "financial_health": "Financial health info",
+        "org_structure": "Org structure info",
+        "news_reputation": "News reputation info",
+        "sources": ["https://example.com"]
+    }
+
+    with patch.object(client, 'create_document') as mock_create:
+        mock_create.return_value = "https://feishu.cn/docx/test123"
+        result = client.generate_research_report("Test Corp", report_data)
+        assert result == "https://feishu.cn/docx/test123"
