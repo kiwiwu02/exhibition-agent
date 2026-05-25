@@ -138,11 +138,11 @@ class BitableClient:
         if card.company_name:
             fields["公司名称"] = card.company_name
         if card.company_name_en:
-            fields["公司英文名称"] = card.company_name_en
+            fields["公司别名"] = card.company_name_en
         if card.company_alias:
             fields["公司别名"] = card.company_alias
         if card.contact_name:
-            fields["联系人"] = card.contact_name
+            fields["联系人姓名"] = card.contact_name
         if card.position:
             fields["职位"] = card.position
         if card.email:
@@ -150,11 +150,11 @@ class BitableClient:
         if card.phone:
             fields["电话"] = card.phone
         if card.address:
-            fields["地址"] = card.address
+            fields["公司地址"] = card.address
         if card.website:
-            fields["网站"] = card.website
+            fields["官网"] = card.website
         if card.country:
-            fields["国家"] = card.country
+            fields["国家/地区"] = card.country
         if card.region:
             fields["区域"] = card.region
         if card.city:
@@ -171,7 +171,7 @@ class BitableClient:
         return CRMSession(
             record_id=record.get("record_id", ""),
             company_name=fields.get("公司名称", ""),
-            contact_name=fields.get("联系人", ""),
+            contact_name=fields.get("联系人姓名", ""),
             email=fields.get("邮箱", ""),
             phone=fields.get("电话", "")
         )

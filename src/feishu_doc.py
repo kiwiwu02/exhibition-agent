@@ -55,7 +55,8 @@ class FeishuDocClient:
             )
             response.raise_for_status()
             data = response.json()
-            document_id = data.get("data", {}).get("document_id")
+            # 飞书API返回格式: data.document.document_id
+            document_id = data.get("data", {}).get("document", {}).get("document_id")
 
             if not document_id:
                 logger.error("创建文档失败：未获取到document_id")
