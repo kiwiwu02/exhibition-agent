@@ -1,10 +1,14 @@
 # src/card_recognizer.py
 import base64
 import json
+import logging
+import os
 import re
 from openai import OpenAI
 from .config import config
 from .models import BusinessCard
+
+logger = logging.getLogger(__name__)
 
 RECOGNITION_PROMPT = """
 请识别这张名片图片，提取以下字段（JSON格式）：
@@ -41,6 +45,8 @@ RECOGNITION_PROMPT = """
 
 def recognize_business_card(image_path: str) -> BusinessCard:
     """使用MiMo-V2.5识别名片图片"""
+    if not os.path.isfile(image_path):
+        raise FileNotFoundError(f"名片图片文件不存在: {image_path}")
     with open(image_path, "rb") as f:
         image_data = base64.b64encode(f.read()).decode()
 
@@ -91,6 +97,6 @@ def parse_recognition_result(result: str) -> BusinessCard:
                 additional_info=data.get("additional_info", ""),
                 confidence=data.get("confidence", {})
             )
-    except (json.JSONDecodeError, AttributeError):
-        pass
+    except (json.JSONDecodeError, AttributeError) as e:
+        logger.warning("解析识别结果失败: %s", e)
     return BusinessCard()
