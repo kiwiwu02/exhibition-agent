@@ -28,3 +28,23 @@ class CRMSession:
     phone: str = ""
     is_duplicate: bool = False
     duplicate_record_id: str = ""
+
+@dataclass
+class ResearchReport:
+    """调研报告数据模型"""
+    company_name: str = ""
+    basic_info: str = ""
+    business_track: str = ""
+    financial_health: str = ""
+    org_structure: str = ""
+    news_reputation: str = ""
+    sources: list = field(default_factory=list)
+    verified: bool = False
+
+@dataclass
+class AgentResult:
+    """Agent调研结果"""
+    agent_name: str = ""
+    content: str = ""
+    sources: list = field(default_factory=list)
+    confidence: str = "medium"  # high/medium/low
