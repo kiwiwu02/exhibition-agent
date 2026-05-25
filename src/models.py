@@ -1,7 +1,6 @@
 # src/models.py
 from dataclasses import dataclass, field
-from typing import Optional, Dict
-from datetime import datetime
+from typing import Dict
 
 @dataclass
 class BusinessCard:
