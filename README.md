@@ -19,33 +19,88 @@
 
 ![效果展示](效果展示图短.png)
 
-## 完整测试用例
-
-共 8 个测试用例（功能一 5 个 + 功能二 3 个），100% 通过：
-
-![完整测试用例](测试完整图.png)
-
 ## 技术架构
 
+### 系统架构
+
 ```
-Feishu Message → MessageHandler → ExhibitionAgent
-  → OCR (Qwen3.5-omni multimodal) → Duplicate Checker → Bitable CRM
-  → SupervisorAgent.research()
-    → Group 1: BasicInfoAgent (serial)
-    → Group 2: 5 agents parallel (Legal, Financial, Org, News, SupplyChain)
-    → Group 3: CrossValidation → CRM Supplement → ReportWriter
-  → FeishuDocClient writes report → Bitable update with link
-  → Reply card to user
+┌─────────────────────────────────────────────────────────────────┐
+│                        飞书机器人 (WebSocket)                      │
+│  接收名片图片 + 文本 → MessageHandler 路由分发                      │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    ExhibitionAgent (主流程)                        │
+│                                                                   │
+│  1. 名片 OCR 识别 (Qwen3.5-omni 多模态)                           │
+│     └─ 文本补充合并 (正则 + LLM 双层解析)                           │
+│  2. 智能重复检测 (邮箱/公司名+联系人/电话 多规则)                     │
+│     ├─ 合并 → 补充已有记录                                         │
+│     └─ 新建 → 创建 Bitable 记录                                    │
+│  3. 公司名自动发现 (域名WHOIS/网页爬取/LinkedIn/搜索 5级策略)         │
+│  4. 已知信息后处理校正 (如三星电子职位自动修正)                       │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   SupervisorAgent (调研调度)                       │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────┐     │
+│  │ Group 1: 基础信息 (串行执行)                               │     │
+│  │   BasicInfoAgent — WHOIS / Wayback / Google Maps /       │     │
+│  │                    LinkedIn / 深度搜索                     │     │
+│  └──────────────────────────┬──────────────────────────────┘     │
+│                              │                                    │
+│  ┌──────────────────────────▼──────────────────────────────┐     │
+│  │ Group 2: 专项调研 (5个Agent并行, ThreadPoolExecutor)       │     │
+│  │   BusinessLegalAgent   — OpenCorporates / 法律风险        │     │
+│  │   FinancialCreditAgent — SEC EDGAR / yfinance / 财务     │     │
+│  │   OrgStructureAgent    — 组织架构 / 管理层 / 招聘          │     │
+│  │   DynamicNewsAgent     — 新闻动态 / 行业趋势              │     │
+│  │   SupplyChainAgent     — 供应链 / 口碑 / 负面信息          │     │
+│  └──────────────────────────┬──────────────────────────────┘     │
+│                              │                                    │
+│  ┌──────────────────────────▼──────────────────────────────┐     │
+│  │ Group 3: 后处理                                           │     │
+│  │   CrossValidationAgent — 多源交叉验证 (名片 vs 调研)      │     │
+│  │   CRMSupplementAgent   — Bitable 缺失字段自动补全         │     │
+│  │   ReportWriterAgent    — 飞书文档 8章节结构化报告生成      │     │
+│  └─────────────────────────────────────────────────────────┘     │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                        输出                                      │
+│  • 飞书卡片回复 (即时)                                            │
+│  • Bitable CRM 记录 (自动写入/更新)                               │
+│  • 飞书文档调研报告 (异步生成, 完成后通知)                          │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-| 组件 | 技术栈 |
-|------|--------|
-| LLM | Qwen3.5-omni，阿里云百炼 |
-| 搜索 | Tavily + DuckDuckGo |
-| 飞书集成 | lark-oapi SDK，WebSocket 连接 |
+### 数据源
+
+| Agent | 数据源 |
+|-------|--------|
+| BasicInfoAgent | WHOIS、Wayback Machine、Google Maps、LinkedIn、DuckDuckGo |
+| BusinessLegalAgent | OpenCorporates、各国工商官网、法律风险数据库 |
+| FinancialCreditAgent | SEC EDGAR、yfinance、各国年报平台 |
+| OrgStructureAgent | LinkedIn、CorporationWiki、公司官网 |
+| DynamicNewsAgent | Google News RSS、公司官网新闻、LinkedIn 动态 |
+| SupplyChainAgent | Trustpilot、Sitejabber、海关公开数据 |
+
+### 技术栈
+
+| 组件 | 技术 |
+|------|------|
+| LLM | Qwen3.5-omni (阿里云百炼) |
+| 搜索引擎 | Tavily + DuckDuckGo |
+| 飞书集成 | lark-oapi SDK (WebSocket) |
 | CRM | 飞书 Bitable 多维表格 |
-| 文档 | 飞书 Docx API |
+| 文档生成 | 飞书 Docx API |
 | Web 框架 | FastAPI + Uvicorn |
+| 并行执行 | Python ThreadPoolExecutor |
+| 数据模型 | Python dataclass |
 
 ## 部署
 
