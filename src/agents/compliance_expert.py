@@ -1,6 +1,7 @@
 from .base import BaseAgent
 from ..models import BusinessCard, AgentResult
 from ..tools.duckduckgo_search import ddgs_search
+from ..tools.web_crawler import crawl_and_extract
 
 
 class ComplianceExpertAgent(BaseAgent):
@@ -13,28 +14,61 @@ class ComplianceExpertAgent(BaseAgent):
         """执行合规调研"""
         sources = []
         content_parts = []
+        source_content_map = {}
 
-        # 1. 搜索工商信息
-        registration_results = ddgs_search(
+        # 1. 搜索工商信息 - 多维度
+        registration_queries = [
             f"{card.company_name} {card.country} company registration",
-            max_results=3
-        )
-        if registration_results:
-            content_parts.append("**工商注册信息**：")
-            for r in registration_results[:2]:
-                content_parts.append(f"- {r.get('title', '')}")
-            sources.extend([r.get('href', '') for r in registration_results if r.get('href')])
+            f"{card.company_name} {card.city} business license",
+        ]
+        if card.website:
+            registration_queries.append(f"site:{card.website.split('//')[-1].split('/')[0]} about")
 
-        # 2. 搜索财务信息
-        financial_results = ddgs_search(
+        registration_results = []
+        for query in registration_queries[:2]:
+            results = ddgs_search(query, max_results=3)
+            registration_results.extend(results)
+
+        if registration_results:
+            urls = [r.get('href', '') for r in registration_results if r.get('href')]
+            unique_urls = list(dict.fromkeys(urls))
+            sources.extend(unique_urls[:3])
+            crawled, crawled_map = crawl_and_extract(unique_urls[:2], max_length_per_page=50000)
+            if crawled:
+                content_parts.append("**工商注册信息（详细）**：")
+                content_parts.append(crawled[:2000])
+                source_content_map.update(crawled_map)
+            else:
+                content_parts.append("**工商注册信息**：")
+                for r in registration_results[:3]:
+                    content_parts.append(f"- {r.get('title', '')}: {r.get('body', '')[:100]}")
+
+        # 2. 搜索财务信息 - 多维度
+        financial_queries = [
             f"{card.company_name} financial report revenue",
-            max_results=3
-        )
+            f"{card.company_name} annual report",
+        ]
+        if card.address:
+            financial_queries.append(f"{card.company_name} {card.address.split(',')[-2].strip() if ',' in card.address else card.city}")
+
+        financial_results = []
+        for query in financial_queries[:2]:
+            results = ddgs_search(query, max_results=3)
+            financial_results.extend(results)
+
         if financial_results:
-            content_parts.append("**财务信息**：")
-            for r in financial_results[:2]:
-                content_parts.append(f"- {r.get('title', '')}")
-            sources.extend([r.get('href', '') for r in financial_results if r.get('href')])
+            urls = [r.get('href', '') for r in financial_results if r.get('href')]
+            unique_urls = list(dict.fromkeys(urls))
+            sources.extend(unique_urls[:3])
+            crawled, crawled_map = crawl_and_extract(unique_urls[:2], max_length_per_page=50000)
+            if crawled:
+                content_parts.append("**财务信息（详细）**：")
+                content_parts.append(crawled[:2000])
+                source_content_map.update(crawled_map)
+            else:
+                content_parts.append("**财务信息**：")
+                for r in financial_results[:3]:
+                    content_parts.append(f"- {r.get('title', '')}: {r.get('body', '')[:100]}")
 
         # 3. 搜索风险信息
         risk_results = ddgs_search(
@@ -42,10 +76,18 @@ class ComplianceExpertAgent(BaseAgent):
             max_results=3
         )
         if risk_results:
-            content_parts.append("**风险信息**：")
-            for r in risk_results[:2]:
-                content_parts.append(f"- {r.get('title', '')}")
-            sources.extend([r.get('href', '') for r in risk_results if r.get('href')])
+            urls = [r.get('href', '') for r in risk_results if r.get('href')]
+            unique_urls = list(dict.fromkeys(urls))
+            sources.extend(unique_urls[:2])
+            crawled, crawled_map = crawl_and_extract(unique_urls[:2], max_length_per_page=50000)
+            if crawled:
+                content_parts.append("**风险信息（详细）**：")
+                content_parts.append(crawled[:2000])
+                source_content_map.update(crawled_map)
+            else:
+                content_parts.append("**风险信息**：")
+                for r in risk_results[:2]:
+                    content_parts.append(f"- {r.get('title', '')}: {r.get('body', '')[:100]}")
 
         # 4. 组装内容
         content = "\n".join(content_parts) if content_parts else "未找到相关合规信息"
@@ -53,5 +95,6 @@ class ComplianceExpertAgent(BaseAgent):
         return self._create_result(
             content=content,
             sources=sources[:5],
-            confidence="medium"
+            confidence="medium",
+            source_content_map=source_content_map
         )

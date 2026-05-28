@@ -207,14 +207,14 @@ class TestBitableClient:
         fields = client.card_to_fields(card)
 
         assert fields["公司名称"] == "Tech Corp"
-        assert fields["公司英文名称"] == "Tech Corporation"
-        assert fields["联系人"] == "John Doe"
+        assert fields["公司别名"] == "Tech Corporation"
+        assert fields["联系人姓名"] == "John Doe"
         assert fields["职位"] == "Manager"
         assert fields["邮箱"] == "john@tech.com"
         assert fields["电话"] == "+86-123456789"
-        assert fields["地址"] == "123 Main St"
-        assert fields["网站"] == "https://tech.com"
-        assert fields["国家"] == "China"
+        assert fields["公司地址"] == "123 Main St"
+        assert fields["官网"] == "https://tech.com"
+        assert fields["国家/地区"] == "China"
         assert fields["城市"] == "Beijing"
 
     def test_record_to_session(self):
@@ -224,7 +224,7 @@ class TestBitableClient:
             "record_id": "rec123",
             "fields": {
                 "公司名称": "Tech Corp",
-                "联系人": "John",
+                "联系人姓名": "John",
                 "邮箱": "john@tech.com",
                 "电话": "+86-123456789"
             }

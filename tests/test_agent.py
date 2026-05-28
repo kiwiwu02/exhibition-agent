@@ -107,10 +107,16 @@ def test_format_response_success():
 
     response = agent.format_response(result)
 
-    assert "Test Corp" in response
-    assert "John" in response
-    assert "john@test.com" in response
-    assert "https://feishu.cn/docx/123" in response
+    assert isinstance(response, dict)
+    assert response["header"]["template"] == "green"
+    # 检查卡片内容中包含关键信息
+    elements_text = str(response["elements"])
+    assert "Test Corp" in elements_text
+    assert "John" in elements_text
+    assert "john@test.com" in elements_text
+    # 检查报告链接按钮
+    actions = response["elements"][-1].get("actions", [])
+    assert any(a.get("url") == "https://feishu.cn/docx/123" for a in actions)
 
 def test_format_response_failure():
     """测试格式化失败响应"""
@@ -119,8 +125,9 @@ def test_format_response_failure():
 
     response = agent.format_response(result)
 
-    assert "处理失败" in response
-    assert "识别失败" in response
+    assert isinstance(response, dict)
+    assert response["header"]["template"] == "red"
+    assert "识别失败" in str(response["elements"])
 
 def test_agent_with_multi_agent():
     """测试Multi-Agent系统集成"""
@@ -137,7 +144,11 @@ def test_agent_with_multi_agent():
         with patch.object(agent.doc_client, 'generate_research_report') as mock_doc:
             mock_doc.return_value = "https://feishu.cn/docx/test"
 
-            result = agent._perform_background_check(card)
+            with patch('src.agent.update_record_fields') as mock_update:
+                mock_update.return_value = True
 
-            assert result["success"] == True
-            assert "report_url" in result
+                result = agent._perform_background_check(card, "record_123")
+
+                assert result["success"] == True
+                assert "report_url" in result
+                mock_update.assert_called_once_with("record_123", {"背调报告链接": "https://feishu.cn/docx/test"})

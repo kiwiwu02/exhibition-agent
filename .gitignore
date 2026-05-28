@@ -26,3 +26,11 @@ Thumbs.db
 # 临时文件
 *.tmp
 *.log
+
+# 项目内部文件
+.cc-connect/
+.claude/
+CLAUDE.md
+*.pdf
+*.png
+docs/superpowers/

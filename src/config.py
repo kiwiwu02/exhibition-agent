@@ -20,7 +20,7 @@ class TavilyConfig:
 
 @dataclass
 class FeishuConfig:
-    app_id: str = os.getenv("FEISHU_APP_ID", "cli_aa9ecb3fb4b89cb1")
+    app_id: str = os.getenv("FEISHU_APP_ID", "")
     app_secret: str = os.getenv("FEISHU_APP_SECRET", "")
     bitable_app_token: str = os.getenv("FEISHU_BITABLE_APP_TOKEN", "")
     bitable_table_id: str = os.getenv("FEISHU_BITABLE_TABLE_ID", "")

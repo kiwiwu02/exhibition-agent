@@ -7,3 +7,12 @@ pytest>=7.0.0
 # 新增依赖（Multi-Agent系统）
 duckduckgo_search>=4.0.0
 yfinance>=0.2.0
+
+# 网页爬取工具
+crawl4ai>=0.8.0
+scrapling>=0.3.0
+
+# Feishu Bot 服务
+lark-oapi>=1.4.0
+fastapi>=0.110.0
+uvicorn>=0.29.0
